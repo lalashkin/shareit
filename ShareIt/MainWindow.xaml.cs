@@ -1,5 +1,5 @@
-﻿using System.Windows;
-
+﻿using System;
+using System.Windows;
 
 namespace ShareIt
 {
@@ -14,5 +14,9 @@ namespace ShareIt
             InitializeComponent();
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
     }
 }

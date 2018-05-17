@@ -1,37 +1,17 @@
 namespace ShareIt.Models
 {
-    using System;
-    using System.ComponentModel;
-    using System.Data.Entity;
-    using System.Linq;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
 
-    public class UserContext : DbContext
-    {
-        // Your context has been configured to use a 'User' connection string from your application's 
-        // configuration file (App.config or Web.config). By default, this connection string targets the 
-        // 'ShareIt.Models.User' database on your LocalDb instance. 
-        // 
-        // If you wish to target a different database and/or database provider, modify the 'User' 
-        // connection string in the application configuration file.
-        public UserContext()
-            : base("name=User")
-        {
-        }
-
-        // Add a DbSet for each entity type that you want to include in your model. For more information 
-        // on configuring and using a Code First model, see http://go.microsoft.com/fwlink/?LinkId=390109.
-
-        // public virtual DbSet<MyEntity> MyEntities { get; set; }
-    }
-
+    [Table("userdata")]
     public class User
     {
-        private int userId { get; set; }
+        [Key]
+        [Column("userid")]
+        public int UserId { get; set; }
+        [Column("username")]
         public string UserName { get; set; }
-
-        public BindingList<Settings> SettingsProfiles;
-        public BindingList<Playlist> Playlists;
-
-        //Связать ЮзерID из таблицы аккаунтов с этим UserId
+        [Column("selectedprofile")]
+        public string SelectedProfile { get; set; }
     }
 }

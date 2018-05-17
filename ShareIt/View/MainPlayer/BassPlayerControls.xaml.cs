@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Un4seen.Bass;
 using ShareIt.Models;
+using ShareIt.ViewModel;
 
 namespace ShareIt.View.MainPlayer
 {
@@ -14,8 +15,10 @@ namespace ShareIt.View.MainPlayer
     public partial class BassPlayerControls : UserControl
     {
         public static BassPlayer MediaPlayer;
+        public static UserSettings userSettings;
 
         private DispatcherTimer timer;
+
 
         public BassPlayerControls()
         {
@@ -29,6 +32,7 @@ namespace ShareIt.View.MainPlayer
 
             //Регистриуем плеер для Анализатора спектра
             spectrumAnalyser.RegisterSoundPlayer(MediaPlayer);
+           
 
             //Присваеваем текущее значение звука (GigaKostil)
             VolumeSlider.Value = Bass.BASS_GetVolume();
@@ -37,9 +41,9 @@ namespace ShareIt.View.MainPlayer
         private void Play_Click(object sender, RoutedEventArgs e)
         {
             //
-            if(!MediaPlayer.IsPlaying && TrackListView.BassTrackViewModel.TracksList.Count != 0)
+            if(!MediaPlayer.IsPlaying && BassTrackVM.TracksList.Count != 0 && MediaPlayer.ActiveStreamHandle == 0)
             {
-                MediaPlayer.OpenFile((TrackListView.BassTrackViewModel.TracksList[0]).TrackPath);
+                MediaPlayer.OpenFile((BassTrackVM.TracksList[TrackListView.currentTrackIndex]).TrackPath);
                 MediaPlayer.Play();
                 return;
             }
@@ -59,7 +63,7 @@ namespace ShareIt.View.MainPlayer
 
         private void MediaPlayer_MediaEnded(object sender, EventArgs e)
         {
-            MediaPlayer.PlayNext(TrackListView.BassTrackViewModel.TracksList);
+            MediaPlayer.PlayNext(BassTrackVM.TracksList);
         }
 
         private void MediaPlayer_MediaOpened(object sender, EventArgs e)
@@ -91,18 +95,25 @@ namespace ShareIt.View.MainPlayer
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
-            UserSettings userSettings = new UserSettings();
-            userSettings.Show();
+            if(userSettings != null)
+            {
+                userSettings.Show();
+            }
+           else
+            {
+                userSettings = new UserSettings();
+                userSettings.Show();
+            }
         }
 
         private void Backward_Click(object sender, RoutedEventArgs e)
         {
-            MediaPlayer.PlayPrev(TrackListView.BassTrackViewModel.TracksList);
+            MediaPlayer.PlayPrev(BassTrackVM.TracksList);
         }
 
         private void Forward_Click(object sender, RoutedEventArgs e)
         {
-            MediaPlayer.PlayNext(TrackListView.BassTrackViewModel.TracksList);
+            MediaPlayer.PlayNext(BassTrackVM.TracksList);
         }
     }
 }

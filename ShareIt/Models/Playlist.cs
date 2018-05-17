@@ -1,32 +1,57 @@
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
+
 namespace ShareIt.Models
 {
-    using System;
-    using System.ComponentModel;
-    using System.Data.Entity;
-    using System.Linq;
-
-    public class PlaylistContext : DbContext
-    {
-        // Your context has been configured to use a 'Playlist' connection string from your application's 
-        // configuration file (App.config or Web.config). By default, this connection string targets the 
-        // 'ShareIt.Models.Playlist' database on your LocalDb instance. 
-        // 
-        // If you wish to target a different database and/or database provider, modify the 'Playlist' 
-        // connection string in the application configuration file.
-        public PlaylistContext()
-            : base("name=Playlist")
-        {
-        }
-
-        // Add a DbSet for each entity type that you want to include in your model. For more information 
-        // on configuring and using a Code First model, see http://go.microsoft.com/fwlink/?LinkId=390109.
-
-        public DbSet<Playlist> PlaylistSet;
-    }
-
+    [DataContract]
+    [Table("playlists")]
     public class Playlist
     {
+        [Column("playlistid")]
+        [Key]
+        public int PlaylistId { get; set; }
+        [DataMember]
+        [Column("ownerid")]
+        public int OwnerId { get; set; }
+        [Column("tracks")]
+        public List<int> PlaylistTracks { get; set; }
+        [DataMember]
+        [NotMapped]
+        public BindingList<BassTrack> PlaylistTracksSerialized { get; set; }
+        [DataMember]
+        [Column("playlistname")]
         public string PlaylistName { get; set; }
-        public BindingList<BassTrack> TracksList { get; set; }
+
+        public Playlist()
+        {
+
+        }
+
+        public Playlist(int ownerid, BindingList<BassTrack> tracks, string playlistName)
+        {
+            this.PlaylistTracks = new List<int>() { };
+            this.PlaylistTracksSerialized = new BindingList<BassTrack>() { };
+
+            this.OwnerId = ownerid;
+            foreach(BassTrack track in tracks)
+            {
+                this.PlaylistTracks.Add(track.TrackId);
+            }
+            foreach (BassTrack track in tracks)
+            {
+                this.PlaylistTracksSerialized.Add(track);
+            }
+            this.PlaylistName = playlistName;
+
+            this.PlaylistId = PlaylistName.GetHashCode() + PlaylistTracks.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return PlaylistName;
+        }
     }
 }

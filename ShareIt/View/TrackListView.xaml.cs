@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using ShareIt.Models;
 using ShareIt.ViewModel;
@@ -13,8 +15,9 @@ namespace ShareIt.View
     /// </summary>
     public partial class TrackListView : UserControl
     {
-        public static BassTrackVM BassTrackViewModel = new BassTrackVM();
+        public BassTrackVM BassTrackViewModel = new BassTrackVM();
         public static int currentTrackIndex;
+
 
         public TrackListView()
         {
@@ -22,7 +25,6 @@ namespace ShareIt.View
             this.DataContext = BassTrackViewModel;
         }
 
-        //Interaction Functions (Маня,Инкапсулируй)
 
         private void TracksList_Drop(object sender, DragEventArgs e)
         {
@@ -30,20 +32,7 @@ namespace ShareIt.View
             {
                 foreach (string path in (string[])e.Data.GetData(DataFormats.FileDrop))
                 {
-                    try
-                    {
-                        if (TagLib.File.Create(path).MimeType == "taglib/mp3" ||
-                            TagLib.File.Create(path).MimeType == "taglib/flac" ||
-                            TagLib.File.Create(path).MimeType == "taglib/wav")
-                        {
-                            BassTrackViewModel.AddTrack(new BassTrack(path));
-                        }
-                    }
-                    catch (TagLib.UnsupportedFormatException)
-                    {
-                        return;
-                    }
-
+                    BassTrackViewModel.AddTrack(path);
                 }
             }
         }
@@ -56,6 +45,41 @@ namespace ShareIt.View
             {
                 BassTrackViewModel.PlayTrack((BassTrack)TracksList.Items[currentTrackIndex]);
             }
+        }
+
+        private void AddPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            PlaylistNameInput nameInput = new PlaylistNameInput();
+            nameInput.Show();
+            PlaylistNameHolder.Content = PlaylistViewModel.CurrentPlaylist;
+        }
+
+        private void OpenPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            PlaylistViewModel PlaylistVM = new PlaylistViewModel();
+            PlaylistVM.OpenPlaylist();
+            PlaylistNameHolder.Content = PlaylistViewModel.CurrentPlaylist;
+
+        }
+
+        private void ResetPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                BassTrackVM.TracksList.Clear();
+                PlaylistViewModel.CurrentPlaylist = null;
+                PlaylistNameHolder.Content = "Default";
+            }
+            catch(System.NullReferenceException)
+            {
+                return;
+            }
+        }
+
+        private void RemoveTrack_Click(object sender, RoutedEventArgs e)
+        {
+            object dataItem = ((FrameworkElement)sender).DataContext;
+            BassTrackVM.TracksList.Remove((BassTrack)dataItem);
         }
     }
 }

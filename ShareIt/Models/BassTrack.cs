@@ -1,117 +1,65 @@
-﻿using System;
-using System.ComponentModel;
-using System.Windows.Controls;
+﻿using System.ComponentModel;
 using System.IO;
-using System.Windows;
-using System.Windows.Media;
-using System.Data.Entity;
-using System.Windows.Media.Imaging;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 
 namespace ShareIt.Models
 {
-    public class BassTrackContext : DbContext
-    {
-        public BassTrackContext()
-            : base("name=track")
-        { }
-
-        public DbSet<BassTrack> TracksList;
-    }
-
+    [DataContract]
+    [Table("tracks")]
     public class BassTrack : INotifyPropertyChanged
     {
 
-        #region variables
+        #region props
         //Название
 
-        private string name;
+        [DataMember]
+        [Key]
+        [Column("trackid")]
+        public int TrackId { get; set; }
 
-        public string Name
-        {
-            get { return name; }
-            protected set
-            {
-                name = value;
-                NotifyPropertyChanged("Name");
-            }
-        }
+        [DataMember]
+        [Column("songname")]
+        public string Name { get; set; }
 
         //Автор
-
-        private string songAuthor;
-
-        public string SongAuthor
-        {
-            get { return songAuthor; }
-            protected set
-            {
-                songAuthor = value;
-                NotifyPropertyChanged("SongAuthor");
-            }
-        }
+        [DataMember]
+        [Column("songauthor")]
+        public string SongAuthor { get; set; }
 
         //Продолжительность
-
-        private string duration;
-
-        public string Duration
-        {
-            get { return duration; }
-            protected set
-            {
-                duration = value;
-                NotifyPropertyChanged("Duration");
-            }
-        }
+        [DataMember]
+        [Column("duration")]
+        public string Duration { get; set; }
 
         //Путь к файлу
-
-        private string trackPath;
-
-        public string TrackPath
-        {
-            get { return trackPath; }
-            protected set
-            {
-                trackPath = value;
-                NotifyPropertyChanged("TrackPath");
-            }
-        }
+        [DataMember]
+        [Column("trackpath")]
+        public string TrackPath { get; set; }
 
         //Битрейт
+        [DataMember]
+        [Column("bitrate")]
+        public string Bitrate { get; set; }
 
-        private string bitrate;
-
-        public string Bitrate
-        {
-            get { return bitrate; }
-            protected set
-            {
-                bitrate = value;
-                NotifyPropertyChanged("Bitrate");
-            }
-        }
-
-        private ImageSource trackCover;
-
+        /*
         public ImageSource TrackCover
         {
-            get { return trackCover;  }
+            get { return TrackCover;  }
             protected set
             {
-                trackCover = value;
+                TrackCover = value;
                 NotifyPropertyChanged("TrackCover");
             }
-        }
+        }*/
 
         #endregion
 
         #region constructor
 
         public BassTrack()
-        {
-
-        }
+        { }
 
         public BassTrack(string path)
         {
@@ -129,7 +77,8 @@ namespace ShareIt.Models
             this.SongAuthor = audioFile.Tag.JoinedPerformers;
             this.Duration = audioFile.Properties.Duration.ToString("mm\\:ss");
             this.Bitrate = audioFile.Properties.AudioBitrate.ToString() + " Kb/s";
-            this.TrackPath = path;  
+            this.TrackPath = path;
+            this.TrackId = this.Name.GetHashCode() + this.Duration.GetHashCode();
         }
 
         #endregion

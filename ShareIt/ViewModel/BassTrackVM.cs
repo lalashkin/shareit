@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Windows;
 using ShareIt.Models;
 using ShareIt.View.MainPlayer;
 
@@ -15,12 +16,12 @@ namespace ShareIt.ViewModel
 
         #region variables
 
-        protected BindingList<BassTrack> tracksList = new BindingList<BassTrack> { };
+        protected static BindingList<BassTrack> tracksList = new BindingList<BassTrack> { };
 
-        public BindingList<BassTrack> TracksList
+        public static BindingList<BassTrack> TracksList
         {
             get { return tracksList; }
-            protected set
+            set
             {
                 tracksList = value;
                 //InotifyPropChanged?
@@ -30,6 +31,29 @@ namespace ShareIt.ViewModel
         #endregion
 
         #region functions
+
+        public void AddTrack(string path)
+        {
+            try
+            {
+                if (TagLib.File.Create(path).MimeType == "taglib/mp3" ||
+                    TagLib.File.Create(path).MimeType == "taglib/flac" ||
+                    TagLib.File.Create(path).MimeType == "taglib/wav")
+                {
+                    tracksList.Add(new BassTrack(path));
+                }
+            }
+            catch (TagLib.UnsupportedFormatException)
+            {
+                return;
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                MessageBox.Show("No such file found at:\n " + path, "File not found!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+           
+        }
 
         public void AddTrack(BassTrack track)
         {

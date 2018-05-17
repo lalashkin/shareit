@@ -1,8 +1,12 @@
 ﻿using ShareIt.View;
+using ShareIt.ViewModel;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Windows;
+using System.Linq;
 using Un4seen.Bass;
+using Un4seen.Bass.AddOn.Fx;
 using WPFSoundVisualizationLib;
 
 namespace ShareIt.Models
@@ -107,9 +111,39 @@ namespace ShareIt.Models
             }
         }
 
+
+        private int[] _fxEQ = { 0, 0, 0, 0, 0, 0, };
+        private int[] _fxEQCenters = { 150, 400, 1000, 3000, 6000, 12000, 18000 };
+        BASS_DX8_PARAMEQ pARAMEQ = new BASS_DX8_PARAMEQ();
+
         #endregion
 
         #region functions
+
+        public void ApplyParamsEQ(int bandsQty, float[] values)
+        {
+            for (int i = 0; i < bandsQty - 1; i++)
+            {
+                _fxEQ[i] = Bass.BASS_ChannelSetFX(ActiveStreamHandle, BASSFXType.BASS_FX_DX8_PARAMEQ, 0);
+            }
+            UpdateParamsEQ(values);
+        }
+
+        public void UpdateParamsEQ(float[] values)
+        {
+            for(int i = 0; i < values.Length - 1; i++)
+            {
+                SetParametersEQ(_fxEQ[i], _fxEQCenters[i], values[i]);
+            }
+        }
+
+        public bool SetParametersEQ(int fx, int center, float gain)
+        {
+            pARAMEQ.fBandwidth = 18.0f;
+            pARAMEQ.fCenter = (float)center;
+            pARAMEQ.fGain = (float)gain;
+            return Bass.BASS_FXSetParameters(fx, pARAMEQ);
+        }
 
         public void Stop()
         {
@@ -228,7 +262,28 @@ namespace ShareIt.Models
                     CanPlay = false;
                 }
             }
-            return false;
+
+            MessageBox.Show("No file found at:\n " + path, "No file found!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            BassTrackVM.TracksList.RemoveAt(TrackListView.currentTrackIndex);
+
+            /*
+             * 
+             * Законсервировано до лучших времен
+             * 
+             * 
+            if(UserSettings.globalCurrentAccount != null)
+            {
+                using (ApplicationContext db = new ApplicationContext())
+                {
+                    PlaylistViewModel.CurrentPlaylist.PlaylistTracks = BassTrackVM.TracksList;
+
+                        db.PlaylistSet.Update(PlaylistViewModel.CurrentPlaylist);
+                        db.SaveChanges();
+
+
+                }
+            }*/
+                return false;
         }
 
         public void PlayNext(BindingList<BassTrack> tracksList)
